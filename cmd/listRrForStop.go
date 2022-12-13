@@ -15,7 +15,7 @@
 package cmd
 
 import (
-	"github.com/equinor/radix-cli/pkg/settings"
+	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"time"
 
 	"github.com/spf13/cobra"

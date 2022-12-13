@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"context"
-	"github.com/equinor/radix-cli/pkg/settings"
+	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	log "github.com/sirupsen/logrus"

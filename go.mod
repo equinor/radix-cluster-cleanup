@@ -1,4 +1,4 @@
-module github.com/equinor/radix-cli
+module github.com/equinor/radix-cluster-cleanup
 
 go 1.18
 
