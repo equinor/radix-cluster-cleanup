@@ -34,7 +34,6 @@ var deleteRrs = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		// cluster, _ := cmd.Flags().GetString(settings.ClusterOption)
 		action := "deletion"
 		inactiveDaysBeforeDeletion, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeDeletionOption)
 		inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)

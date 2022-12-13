@@ -30,7 +30,6 @@ var listRrsForStop = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		// cluster, _ := cmd.Flags().GetString(settings.ClusterOption)
 		action := "stop"
 		inactiveDaysBeforeStop, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeStopOption)
 		inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
