@@ -123,7 +123,7 @@ func getTooInactiveRrs(kubeClient *kube.Kube, inactivityLimit time.Duration, act
 	if err != nil {
 		return nil, err
 	}
-	rrsForDeletion := make([]v1.RadixRegistration, 0)
+	var rrsForDeletion []v1.RadixRegistration
 	for _, rr := range rrs {
 		if isWhitelisted(rr) {
 			log.Debugf("RadixRegistration %s is whitelisted, skipping", rr.Name)
