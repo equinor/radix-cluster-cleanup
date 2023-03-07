@@ -1,0 +1,30 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rr-cleaner
+rules:
+  - apiGroups: ["radix.equinor.com"]
+    resources: ["radixregistrations", "radixdeployments", "radixjobs"]
+    verbs: ["list"]
+  - apiGroups: ["radix.equinor.com"]
+    resources: ["radixapplications"]
+    verbs: ["get"]
+  - apiGroups: ["radix.equinor.com"]
+    resources: ["radixregistrations"]
+    verbs: ["delete"]
+  - apiGroups: ["*"]
+    resources: ["deployments"]
+    verbs: ["patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: rr-cleaner
+subjects:
+  - kind: User
+    name: xx
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: rr-cleaner
+  apiGroup: rbac.authorization.k8s.io

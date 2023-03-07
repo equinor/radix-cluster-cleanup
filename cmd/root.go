@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/equinor/radix-acr-cleanup/pkg/delaytick"
+	"github.com/equinor/radix-acr-cleanup/pkg/timewindow"
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
@@ -15,6 +17,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"math/rand"
 	"os"
 	"sort"
 	"strings"
@@ -49,6 +52,10 @@ func init() {
 	rootCmd.PersistentFlags().Int64(settings.InactiveDaysBeforeDeletionOption, defaultInactiveDaysBeforeDeletion, "max inactivity period before deleting RadixRegistrations")
 	rootCmd.PersistentFlags().Int64(settings.InactiveDaysBeforeStopOption, defaultInactiveDaysBeforeStop, "max inactivity period before stopping components in RadixRegistrations")
 	rootCmd.PersistentFlags().String(settings.WhitelistOption, "", "custom whitelist of RadixRegistrations to exclude from cleanup. Appended to default, hardcoded whitelist")
+	rootCmd.PersistentFlags().StringSlice(settings.CleanUpDaysOption, []string{"mo", "tu", "we", "th", "fr", "sa", "su"}, "for commands that run continuously, this option specifies which weekdays the command will be active")
+	rootCmd.PersistentFlags().String(settings.CleanUpStartOption, "06:00", "for commands that run continuously, this option specifies which time of day the command will be active from")
+	rootCmd.PersistentFlags().String(settings.CleanUpEndOption, "06:00", "for commands that run continuously, this option specifies which time of day the command will be active to")
+	rootCmd.PersistentFlags().Int64(settings.CleanUpPeriodOption, 30, "for commands that run continuously, this option specifies how many minutes between each consecutive run of the command")
 	logLevel, logErr := os.Getenv("LOG_LEVEL"), error(nil)
 	if logErr != nil {
 		logLevel = defaultLogLevel
@@ -116,6 +123,34 @@ func getKubeUtil() (*kube.Kube, error) {
 		return nil, err
 	}
 	return kubeutil, nil
+}
+
+func runFunctionPeriodically(someFunc func() error) error {
+	cleanupDays := []string{"mo", "tu"}
+	cleanupStart := "09:00"
+	cleanupEnd := "12:00"
+	timezone := "Local"
+	period := time.Second * 2
+	window, err := timewindow.New(cleanupDays, cleanupStart, cleanupEnd, timezone)
+	if err != nil {
+		log.Fatalf("Failed to build time window: %v", err)
+	}
+	source := rand.NewSource(time.Now().UnixNano())
+	tick := delaytick.New(source, period)
+	for range tick {
+		pointInTime := time.Now()
+		if window.Contains(pointInTime) {
+			log.Infof("Start listing RRs for stop %s", pointInTime)
+			err := someFunc()
+			if err != nil {
+				return err
+			}
+		} else {
+			log.Infof("%s is outside of window. Continue sleeping", pointInTime)
+		}
+	}
+	log.Warnf("execution reached code which was presumably after an inescapable loop")
+	return nil
 }
 
 func getTooInactiveRrs(kubeClient *kube.Kube, inactivityLimit time.Duration, action string) ([]v1.RadixRegistration, error) {

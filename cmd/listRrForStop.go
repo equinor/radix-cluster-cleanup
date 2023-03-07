@@ -21,29 +21,43 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var listRrsForStop = &cobra.Command{
+var listRrsForStopContinuouslyCommand = &cobra.Command{
+	Use:   "list-rrs-for-stop-daemon",
+	Short: "Continuously list RadixRegistrations which qualify for stop",
+	Long:  "Continuously list RadixRegistrations which qualify for stop",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runFunctionPeriodically(listRrsForStop)
+	},
+}
+
+var listRrsForStopCommand = &cobra.Command{
 	Use:   "list-rrs-for-stop",
 	Short: "Lists RadixRegistrations which qualify for stop",
 	Long:  "Lists RadixRegistrations which qualify for stop.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		kubeClient, err := getKubeUtil()
-		if err != nil {
-			return err
-		}
-		action := "stop"
-		inactiveDaysBeforeStop, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeStopOption)
-		inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
-		tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
-		if err != nil {
-			return err
-		}
-		for _, rr := range tooInactiveRrs {
-			println(rr.Name)
-		}
-		return nil
+		return listRrsForStop()
 	},
 }
 
+func listRrsForStop() error {
+	kubeClient, err := getKubeUtil()
+	if err != nil {
+		return err
+	}
+	action := "stop"
+	inactiveDaysBeforeStop, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeStopOption)
+	inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
+	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
+	if err != nil {
+		return err
+	}
+	for _, rr := range tooInactiveRrs {
+		println(rr.Name)
+	}
+	return nil
+}
+
 func init() {
-	rootCmd.AddCommand(listRrsForStop)
+	rootCmd.AddCommand(listRrsForStopCommand)
+	rootCmd.AddCommand(listRrsForStopContinuouslyCommand)
 }

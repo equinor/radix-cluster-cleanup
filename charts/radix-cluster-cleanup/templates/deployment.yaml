@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "radix-cluster-cleanup.fullname" . }}
+  labels:
+    {{- include "radix-cluster-cleanup.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "radix-cluster-cleanup.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- if (.Values.metrics.enabled) }}
+      annotations:
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+        {{- if (.Values.metrics.annotations) }}
+        {{- toYaml .Values.metrics.annotations | nindent 8 }}
+        {{- end }}
+    {{- end }}
+      labels:
+        {{- include "radix-cluster-cleanup.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "radix-cluster-cleanup.serviceAccountName" . }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        supplementalGroups:
+          - 1000
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+            - name: PERIOD
+              value: {{ .Values.period }}
+            - name: CLEANUP_DAYS
+              value: {{ .Values.cleanupDays | quote }}
+            - name: CLEANUP_START
+              value: {{ .Values.cleanupStart | quote }}
+            - name: CLEANUP_END
+              value: {{ .Values.cleanupEnd | quote }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: {{ .Values.servicePrincipalSecret }}
+              mountPath: /{{ .Chart.Name }}/.azure
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            privileged: false
+            readOnlyRootFilesystem: false
+            allowPrivilegeEscalation: false
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
