@@ -32,10 +32,10 @@ var listRrsForDeletion = &cobra.Command{
 		}
 		action := "deletion"
 		inactiveDaysBeforeDeletion, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeDeletionOption)
-		inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
 		if err != nil {
 			return err
 		}
+		inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
 		tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeDeletion, action)
 		if err != nil {
 			return err

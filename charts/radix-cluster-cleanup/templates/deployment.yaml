@@ -49,10 +49,6 @@ spec:
               value: {{ .Values.cleanupEnd | quote }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          volumeMounts:
-            - name: {{ .Values.servicePrincipalSecret }}
-              mountPath: /{{ .Chart.Name }}/.azure
-              readOnly: true
           ports:
             - name: http
               containerPort: 8080

@@ -46,6 +46,9 @@ func listRrsForStop() error {
 	}
 	action := "stop"
 	inactiveDaysBeforeStop, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeStopOption)
+	if err != nil {
+		return err
+	}
 	inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
 	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
 	if err != nil {

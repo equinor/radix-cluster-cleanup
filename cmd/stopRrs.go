@@ -38,6 +38,9 @@ var stopRrs = &cobra.Command{
 		}
 		action := "stop"
 		inactiveDaysBeforeStop, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeStopOption)
+		if err != nil {
+			return err
+		}
 		inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
 		tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
 		if err != nil {
@@ -77,7 +80,7 @@ func stopRr(kubeClient *kube.Kube, rr v1.RadixRegistration) error {
 
 func scaleRdComponentsToZeroReplicas(kubeClient *kube.Kube, rd v1.RadixDeployment) error {
 	componentNames := make([]string, 0)
-	for i, _ := range rd.Spec.Components {
+	for i := range rd.Spec.Components {
 		rd.Spec.Components[i].Replicas = numbers.IntPtr(0)
 		componentNames = append(componentNames, rd.Spec.Components[i].Name)
 	}

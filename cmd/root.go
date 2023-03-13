@@ -249,16 +249,16 @@ func rrIsInactive(rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit t
 		latestRadixJobTimestamp = *latestRadixJob.Status.Created
 	}
 
-	log.Debugf("most recent radixDeployment is %s, active from %s, %d hours ago", latestRadixDeployment.Name, latestRadixDeploymentTimestamp.Format(time.RFC822), int(time.Now().Sub(latestRadixDeploymentTimestamp.Time).Hours()))
-	log.Debugf("most recent radixJob was %s, created %s, %d hours ago", latestRadixJob.Name, latestRadixJobTimestamp.Format(time.RFC822), int(time.Now().Sub(latestRadixJobTimestamp.Time).Hours()))
+	log.Debugf("most recent radixDeployment is %s, active from %s, %d hours ago", latestRadixDeployment.Name, latestRadixDeploymentTimestamp.Format(time.RFC822), int(time.Since(latestRadixDeploymentTimestamp.Time).Hours()))
+	log.Debugf("most recent radixJob was %s, created %s, %d hours ago", latestRadixJob.Name, latestRadixJobTimestamp.Format(time.RFC822), int(time.Since(latestRadixJobTimestamp.Time).Hours()))
 	latestUserMutationTimestamp, err := getLastUserMutationTimestamp(latestRadixDeployment)
 	if err != nil {
 		return false, err
 	}
-	log.Debugf("most recent manual user activity was %s, %d hours ago", latestUserMutationTimestamp.Format(time.RFC822), int(time.Now().Sub(latestUserMutationTimestamp.Time).Hours()))
+	log.Debugf("most recent manual user activity was %s, %d hours ago", latestUserMutationTimestamp.Format(time.RFC822), int(time.Since(latestUserMutationTimestamp.Time).Hours()))
 	lastActivity := getMostRecentTimestamp(&latestRadixJobTimestamp, latestUserMutationTimestamp, &latestRadixDeploymentTimestamp)
 	if tooLongInactivity(lastActivity, inactivityLimit) {
-		log.Infof("%s: last activity was %d hours ago, which is more than %d hours ago, marking for %s", latestRadixDeployment.Spec.AppName, int(time.Now().Sub(lastActivity.Time).Hours()), int(inactivityLimit.Hours()), action)
+		log.Infof("%s: last activity was %d hours ago, which is more than %d hours ago, marking for %s", latestRadixDeployment.Spec.AppName, int(time.Since(lastActivity.Time).Hours()), int(inactivityLimit.Hours()), action)
 		return true, nil
 	}
 	return false, nil
@@ -297,10 +297,7 @@ func getMostRecentTimestamp(timestamps ...*metav1.Time) *metav1.Time {
 }
 
 func tooLongInactivity(lastActivity *metav1.Time, ageLimit time.Duration) bool {
-	if lastActivity.Unix() < time.Now().Add(-ageLimit).Unix() {
-		return true
-	}
-	return false
+	return lastActivity.Unix() < time.Now().Add(-ageLimit).Unix()
 }
 
 func SortJobsByTimestampAsc(rjs []v1.RadixJob) []v1.RadixJob {
