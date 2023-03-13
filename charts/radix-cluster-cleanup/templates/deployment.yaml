@@ -47,6 +47,10 @@ spec:
               value: {{ .Values.cleanupStart | quote }}
             - name: CLEANUP_END
               value: {{ .Values.cleanupEnd | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+            - name: COMMAND
+              value: {{ .Values.command | quote }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:

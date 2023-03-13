@@ -3,6 +3,8 @@ period: 60m
 cleanupDays: "su,mo,tu,we,th,fr,sa"
 cleanupStart: "0:00"
 cleanupEnd: "6:00"
+logLevel: INFO
+command: list-rrs-for-stop-and-deletion-continuously
 
 metrics:
   enabled: false
