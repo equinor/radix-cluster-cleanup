@@ -73,6 +73,7 @@ func init() {
 func getWhitelist() []string {
 	hardcodedWhitelist := []string{
 		"radix-api",
+		"radix-platform",
 		"radix-web-console",
 		"radix-vulnerability-scanner",
 		"radix-github-webhook",
