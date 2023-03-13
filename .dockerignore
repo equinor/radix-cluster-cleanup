@@ -1,4 +1,4 @@
-dist/
+radix-cluster-cleanup/dist/
 .idea
 .vscode
 Dockerfile

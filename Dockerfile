@@ -8,14 +8,15 @@ RUN apk update && \
 
 RUN go install honnef.co/go/tools/cmd/staticcheck@v0.3.3
 
-WORKDIR /go/src/github.com/equinor/radix-cluster-cleanup/
+WORKDIR /go/src/github.com/equinor/radix-cluster-cleanup
 
 # Install project dependencies
-COPY go.mod go.sum ./
+COPY radix-cluster-cleanup/go.mod radix-cluster-cleanup/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY ./radix-cluster-cleanup .
 # run tests and linting
+
 RUN staticcheck ./... && \
     go vet ./... && \
     go test ./... && \
@@ -29,10 +30,9 @@ RUN adduser -S -u 1000 -G radix-cluster-cleanup radix-cluster-cleanup
 
 # Run operator
 FROM alpine
+COPY run_cluster_cleanup.sh /run_cluster_cleanup.sh
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /usr/local/bin/radix-cluster-cleanup /radix-cluster-cleanup
-COPY run-cluster-cleanup.sh /run-cluster-cleanup.sh
-USER radix-cluster-cleanupe
-ENTRYPOINT ["/radix-cluster-cleanup"]
-CMD ["list-rrs-for-stop", "--period=\${PERIOD}"]
+USER radix-cluster-cleanup
+ENTRYPOINT ["/run_cluster_cleanup.sh"]

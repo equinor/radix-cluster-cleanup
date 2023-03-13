@@ -21,9 +21,10 @@ kind: ClusterRoleBinding
 metadata:
   name: rr-cleaner
 subjects:
-  - kind: User
-    name: xx
-    apiGroup: rbac.authorization.k8s.io
+  - apiGroup: ""
+    kind: ServiceAccount
+    name: {{ include "radix-cluster-cleanup.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: rr-cleaner
