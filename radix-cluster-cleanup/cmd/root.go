@@ -59,7 +59,7 @@ func init() {
 	rootCmd.PersistentFlags().StringSlice(settings.CleanUpDaysOption, []string{"mo", "tu", "we", "th", "fr", "sa", "su"}, "for commands that run continuously, this option specifies which weekdays the command will be active")
 	rootCmd.PersistentFlags().String(settings.CleanUpStartOption, "06:00", "for commands that run continuously, this option specifies which time of day the command will be active from")
 	rootCmd.PersistentFlags().String(settings.CleanUpEndOption, "09:00", "for commands that run continuously, this option specifies which time of day the command will be active to")
-	rootCmd.PersistentFlags().Int64(settings.CleanUpPeriodOption, 30, "for commands that run continuously, this option specifies how many minutes between each consecutive run of the command")
+	rootCmd.PersistentFlags().Duration(settings.CleanUpPeriodOption, time.Minute*30, "for commands that run continuously, this option specifies how long between each consecutive run of the command")
 	logLevel, logErr := os.Getenv("LOG_LEVEL"), error(nil)
 	if logErr != nil {
 		logLevel = defaultLogLevel
@@ -134,12 +134,12 @@ func runFunctionPeriodically(someFunc func() error) error {
 	cleanupDays, cleanupDaysErr := rootCmd.Flags().GetStringSlice(settings.CleanUpDaysOption)
 	cleanupStart, cleanupStartErr := rootCmd.Flags().GetString(settings.CleanUpStartOption)
 	cleanupEnd, cleanupEndErr := rootCmd.Flags().GetString(settings.CleanUpEndOption)
-	err := commonErrors.Concat([]error{cleanupDaysErr, cleanupStartErr, cleanupEndErr})
+	period, periodErr := rootCmd.Flags().GetDuration(settings.CleanUpPeriodOption)
+	err := commonErrors.Concat([]error{cleanupDaysErr, cleanupStartErr, cleanupEndErr, periodErr})
 	if err != nil {
 		return err
 	}
 	timezone := "Local"
-	period := time.Second * 2
 	window, err := timewindow.New(cleanupDays, cleanupStart, cleanupEnd, timezone)
 	if err != nil {
 		log.Fatalf("Failed to build time window: %v", err)
