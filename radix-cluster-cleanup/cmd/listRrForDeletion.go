@@ -15,38 +15,53 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
-var listRrsForDeletion = &cobra.Command{
+var listRrsForDeletionContinuouslyCommand = &cobra.Command{
+	Use:   "list-rrs-for-deletion-continuously",
+	Short: "Continuously lists RadixRegistrations which qualify for deletion",
+	Long:  "Continuously lists RadixRegistrations which qualify for deletion.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runFunctionPeriodically(listRrsForDeletion)
+	},
+}
+
+var listRrsForDeletionCommand = &cobra.Command{
 	Use:   "list-rrs-for-deletion",
 	Short: "Lists RadixRegistrations which qualify for deletion",
 	Long:  "Lists RadixRegistrations which qualify for deletion.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		kubeClient, err := getKubeUtil()
-		if err != nil {
-			return err
-		}
-		action := "deletion"
-		inactiveDaysBeforeDeletion, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeDeletionOption)
-		if err != nil {
-			return err
-		}
-		inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
-		tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeDeletion, action)
-		if err != nil {
-			return err
-		}
-		for _, rr := range tooInactiveRrs {
-			println(rr.Name)
-		}
-		return nil
+		return listRrsForDeletion()
 	},
 }
 
+func listRrsForDeletion() error {
+	kubeClient, err := getKubeUtil()
+	if err != nil {
+		return err
+	}
+	action := "deletion"
+	inactiveDaysBeforeDeletion, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeDeletionOption)
+	if err != nil {
+		return err
+	}
+	inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
+	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeDeletion, action)
+	if err != nil {
+		return err
+	}
+	for _, rr := range tooInactiveRrs {
+		fmt.Print(rr.Name)
+	}
+	return nil
+}
+
 func init() {
-	rootCmd.AddCommand(listRrsForDeletion)
+	rootCmd.AddCommand(listRrsForDeletionCommand)
+	rootCmd.AddCommand(listRrsForDeletionContinuouslyCommand)
 }

@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"time"
 
@@ -22,7 +23,7 @@ import (
 )
 
 var listRrsForStopContinuouslyCommand = &cobra.Command{
-	Use:   "list-rrs-for-stop-daemon",
+	Use:   "list-rrs-for-stop-continuously",
 	Short: "Continuously list RadixRegistrations which qualify for stop",
 	Long:  "Continuously list RadixRegistrations which qualify for stop",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -55,7 +56,7 @@ func listRrsForStop() error {
 		return err
 	}
 	for _, rr := range tooInactiveRrs {
-		println(rr.Name)
+		fmt.Print(rr.Name)
 	}
 	return nil
 }

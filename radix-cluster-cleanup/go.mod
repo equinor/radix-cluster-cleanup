@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/equinor/radix-acr-cleanup v0.0.0-20220823131443-c38c7d20e433
+	github.com/equinor/radix-common v1.2.7
 	github.com/equinor/radix-operator v1.28.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.5.0
@@ -21,7 +22,6 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/equinor/radix-common v1.2.4 // indirect
 	github.com/go-logr/logr v1.2.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect

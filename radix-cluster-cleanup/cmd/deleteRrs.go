@@ -25,37 +25,51 @@ import (
 	"time"
 )
 
-var deleteRrs = &cobra.Command{
+var deleteRrsContinuouslyCommand = &cobra.Command{
+	Use:   "delete-inactive-rrs-continuously",
+	Short: "Continuously delete inactive RadixRegistrations",
+	Long:  "Continuously delete inactive RadixRegistrations",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runFunctionPeriodically(deleteRrs)
+	},
+}
+
+var deleteRrsCommand = &cobra.Command{
 	Use:   "delete-inactive-rrs",
 	Short: "Delete inactive RadixRegistrations",
 	Long:  "Delete inactive RadixRegistrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		kubeClient, err := getKubeUtil()
-		if err != nil {
-			return err
-		}
-		action := "deletion"
-		inactiveDaysBeforeDeletion, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeDeletionOption)
-		if err != nil {
-			return err
-		}
-		inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
-		tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeDeletion, action)
-		if err != nil {
-			return err
-		}
-		for _, rr := range tooInactiveRrs {
-			err := deleteRr(kubeClient, rr)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
+		return deleteRrs()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(deleteRrs)
+	rootCmd.AddCommand(deleteRrsCommand)
+	rootCmd.AddCommand(deleteRrsContinuouslyCommand)
+}
+
+func deleteRrs() error {
+	kubeClient, err := getKubeUtil()
+	if err != nil {
+		return err
+	}
+	action := "deletion"
+	inactiveDaysBeforeDeletion, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeDeletionOption)
+	if err != nil {
+		return err
+	}
+	inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
+	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeDeletion, action)
+	if err != nil {
+		return err
+	}
+	for _, rr := range tooInactiveRrs {
+		err := deleteRr(kubeClient, rr)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func deleteRr(client *kube.Kube, rr v1.RadixRegistration) error {

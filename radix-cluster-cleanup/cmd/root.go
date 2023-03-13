@@ -3,13 +3,12 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/equinor/radix-acr-cleanup/pkg/delaytick"
-	"github.com/equinor/radix-acr-cleanup/pkg/timewindow"
-	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
-	"github.com/equinor/radix-operator/pkg/apis/kube"
-	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
-	"github.com/equinor/radix-operator/pkg/apis/utils"
-	radixclient "github.com/equinor/radix-operator/pkg/client/clientset/versioned"
+	"math/rand"
+	"os"
+	"sort"
+	"strings"
+	"time"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -17,11 +16,16 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"math/rand"
-	"os"
-	"sort"
-	"strings"
-	"time"
+
+	"github.com/equinor/radix-acr-cleanup/pkg/delaytick"
+	"github.com/equinor/radix-acr-cleanup/pkg/timewindow"
+	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
+	"github.com/equinor/radix-operator/pkg/apis/kube"
+	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
+
+	commonErrors "github.com/equinor/radix-common/utils/errors"
+	"github.com/equinor/radix-operator/pkg/apis/utils"
+	radixclient "github.com/equinor/radix-operator/pkg/client/clientset/versioned"
 )
 
 const defaultInactiveDaysBeforeDeletion = 7 * 4
@@ -54,7 +58,7 @@ func init() {
 	rootCmd.PersistentFlags().String(settings.WhitelistOption, "", "custom whitelist of RadixRegistrations to exclude from cleanup. Appended to default, hardcoded whitelist")
 	rootCmd.PersistentFlags().StringSlice(settings.CleanUpDaysOption, []string{"mo", "tu", "we", "th", "fr", "sa", "su"}, "for commands that run continuously, this option specifies which weekdays the command will be active")
 	rootCmd.PersistentFlags().String(settings.CleanUpStartOption, "06:00", "for commands that run continuously, this option specifies which time of day the command will be active from")
-	rootCmd.PersistentFlags().String(settings.CleanUpEndOption, "06:00", "for commands that run continuously, this option specifies which time of day the command will be active to")
+	rootCmd.PersistentFlags().String(settings.CleanUpEndOption, "09:00", "for commands that run continuously, this option specifies which time of day the command will be active to")
 	rootCmd.PersistentFlags().Int64(settings.CleanUpPeriodOption, 30, "for commands that run continuously, this option specifies how many minutes between each consecutive run of the command")
 	logLevel, logErr := os.Getenv("LOG_LEVEL"), error(nil)
 	if logErr != nil {
@@ -127,9 +131,13 @@ func getKubeUtil() (*kube.Kube, error) {
 }
 
 func runFunctionPeriodically(someFunc func() error) error {
-	cleanupDays := []string{"mo", "tu"}
-	cleanupStart := "09:00"
-	cleanupEnd := "12:00"
+	cleanupDays, cleanupDaysErr := rootCmd.Flags().GetStringSlice(settings.CleanUpDaysOption)
+	cleanupStart, cleanupStartErr := rootCmd.Flags().GetString(settings.CleanUpStartOption)
+	cleanupEnd, cleanupEndErr := rootCmd.Flags().GetString(settings.CleanUpEndOption)
+	err := commonErrors.Concat([]error{cleanupDaysErr, cleanupStartErr, cleanupEndErr})
+	if err != nil {
+		return err
+	}
 	timezone := "Local"
 	period := time.Second * 2
 	window, err := timewindow.New(cleanupDays, cleanupStart, cleanupEnd, timezone)
