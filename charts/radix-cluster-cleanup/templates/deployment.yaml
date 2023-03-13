@@ -40,7 +40,7 @@ spec:
         - name: {{ .Chart.Name }}
           env:
             - name: PERIOD
-              value: {{ .Values.period }}
+              value: {{ .Values.period | quote}}
             - name: CLEANUP_DAYS
               value: {{ .Values.cleanupDays | quote }}
             - name: CLEANUP_START
