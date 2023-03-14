@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "radix-cluster-cleanup.fullname" . }}
-  namespace: radix-cluster-cleanup
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "radix-cluster-cleanup.labels" . | nindent 4 }}
 spec:
