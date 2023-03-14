@@ -27,30 +27,46 @@ import (
 	"time"
 )
 
-var stopRrs = &cobra.Command{
+var stopRrsContinuouslyCommand = &cobra.Command{
+	Use:   "stop-inactive-rrs-continuously",
+	Short: "Continuously stop all components in inactive RadixRegistrations",
+	Long:  "Continuously stop all components in inactive RadixRegistrations",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return runFunctionPeriodically(stopRrs)
+	},
+}
+
+var stopRrsCommand = &cobra.Command{
 	Use:   "stop-inactive-rrs",
 	Short: "Stop all components in inactive RadixRegistrations",
 	Long:  "Stop all components in inactive RadixRegistrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		kubeClient, err := getKubeUtil()
-		if err != nil {
-			return err
-		}
-		action := "stop"
-		inactiveDaysBeforeStop, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeStopOption)
-		inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
-		tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
-		if err != nil {
-			return err
-		}
-		for _, rr := range tooInactiveRrs {
-			err := stopRr(kubeClient, rr)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
+		return stopRrs()
 	},
+}
+
+func stopRrs() error {
+	kubeClient, err := getKubeUtil()
+	if err != nil {
+		return err
+	}
+	action := "stop"
+	inactiveDaysBeforeStop, err := rootCmd.Flags().GetInt64(settings.InactiveDaysBeforeStopOption)
+	if err != nil {
+		return err
+	}
+	inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
+	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
+	if err != nil {
+		return err
+	}
+	for _, rr := range tooInactiveRrs {
+		err := stopRr(kubeClient, rr)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func stopRr(kubeClient *kube.Kube, rr v1.RadixRegistration) error {
@@ -77,7 +93,7 @@ func stopRr(kubeClient *kube.Kube, rr v1.RadixRegistration) error {
 
 func scaleRdComponentsToZeroReplicas(kubeClient *kube.Kube, rd v1.RadixDeployment) error {
 	componentNames := make([]string, 0)
-	for i, _ := range rd.Spec.Components {
+	for i := range rd.Spec.Components {
 		rd.Spec.Components[i].Replicas = numbers.IntPtr(0)
 		componentNames = append(componentNames, rd.Spec.Components[i].Name)
 	}
@@ -94,5 +110,6 @@ func rdIsActive(rd v1.RadixDeployment) bool {
 }
 
 func init() {
-	rootCmd.AddCommand(stopRrs)
+	rootCmd.AddCommand(stopRrsCommand)
+	rootCmd.AddCommand(stopRrsContinuouslyCommand)
 }

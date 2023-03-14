@@ -1,0 +1,39 @@
+# Parameters to control behavior
+period: 60m
+cleanupDays: "su,mo,tu,we,th,fr,sa"
+cleanupStart: "0:00"
+cleanupEnd: "6:00"
+logLevel: INFO
+command: list-rrs-for-stop-and-deletion-continuously
+
+metrics:
+  enabled: false
+  annotations: {}
+
+serviceAccount:
+  # The name of the service account to use.
+  # If not set, a name is generated using the fullname template
+  name: ""
+
+image:
+  repository: xx
+  tag: xx
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+resources: 
+  limits:
+    cpu: 2000m
+    memory: 150Mi
+  requests:
+    cpu: 50m
+    memory: 150Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

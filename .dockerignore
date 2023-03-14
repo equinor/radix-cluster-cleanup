@@ -1,0 +1,6 @@
+radix-cluster-cleanup/dist/
+.dockerignore
+radix-cluster-cleanup/radix-cluster-cleanup
+.idea
+.vscode
+Dockerfile
