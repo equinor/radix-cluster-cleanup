@@ -311,7 +311,7 @@ func tooLongInactivity(lastActivity *metav1.Time, ageLimit time.Duration) bool {
 
 func SortJobsByTimestampAsc(rjs []v1.RadixJob) []v1.RadixJob {
 	sort.Slice(rjs, func(i, j int) bool {
-		return isRJ1CreatedAfterRJ2(&rjs[j], &rjs[i])
+		return isRJ1CreatedAfterRJ2(&rjs[i], &rjs[j])
 	})
 	return rjs
 }
