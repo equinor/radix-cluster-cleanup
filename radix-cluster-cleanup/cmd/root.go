@@ -252,14 +252,15 @@ func rrIsInactive(rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit t
 	}
 	latestRadixDeployment := SortDeploymentsByActiveFromTimestampAsc(rds)[len(rds)-1]
 	latestRadixDeploymentTimestamp := latestRadixDeployment.Status.ActiveFrom
+	log.Debugf("most recent radixDeployment is %s, active from %s, %d hours ago", latestRadixDeployment.Name, latestRadixDeploymentTimestamp.Format(time.RFC822), int(time.Since(latestRadixDeploymentTimestamp.Time).Hours()))
+
 	latestRadixJobTimestamp := metav1.Time{Time: time.Unix(0, 0)}
 	latestRadixJob := getLatestRadixJob(rjs)
 	if latestRadixJob != nil {
 		latestRadixJobTimestamp = *latestRadixJob.Status.Created
+		log.Debugf("most recent radixJob was %s, created %s, %d hours ago", latestRadixJob.Name, latestRadixJobTimestamp.Format(time.RFC822), int(time.Since(latestRadixJobTimestamp.Time).Hours()))
 	}
 
-	log.Debugf("most recent radixDeployment is %s, active from %s, %d hours ago", latestRadixDeployment.Name, latestRadixDeploymentTimestamp.Format(time.RFC822), int(time.Since(latestRadixDeploymentTimestamp.Time).Hours()))
-	log.Debugf("most recent radixJob was %s, created %s, %d hours ago", latestRadixJob.Name, latestRadixJobTimestamp.Format(time.RFC822), int(time.Since(latestRadixJobTimestamp.Time).Hours()))
 	latestUserMutationTimestamp, err := getLastUserMutationTimestamp(latestRadixDeployment)
 	if err != nil {
 		return false, err
