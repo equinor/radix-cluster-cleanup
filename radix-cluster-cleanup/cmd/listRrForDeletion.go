@@ -56,7 +56,7 @@ func listRrsForDeletion() error {
 		return err
 	}
 	for _, rr := range tooInactiveRrs {
-		fmt.Print(rr.Name)
+		fmt.Printf("%s\n", rr.Name)
 	}
 	return nil
 }
