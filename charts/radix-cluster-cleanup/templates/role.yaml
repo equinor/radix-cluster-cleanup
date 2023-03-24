@@ -12,8 +12,8 @@ rules:
   - apiGroups: ["radix.equinor.com"]
     resources: ["radixregistrations"]
     verbs: ["delete"]
-  - apiGroups: ["*"]
-    resources: ["deployments"]
+  - apiGroups: ["radix.equinor.com"]
+    resources: ["radixdeployments"]
     verbs: ["patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
