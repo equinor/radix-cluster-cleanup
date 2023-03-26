@@ -14,7 +14,7 @@ rules:
     verbs: ["delete"]
   - apiGroups: ["radix.equinor.com"]
     resources: ["radixdeployments"]
-    verbs: ["patch"]
+    verbs: ["update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
