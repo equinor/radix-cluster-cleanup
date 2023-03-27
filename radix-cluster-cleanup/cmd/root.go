@@ -184,14 +184,17 @@ func getTooInactiveRrs(kubeClient *kube.Kube, inactivityLimit time.Duration, act
 		namespaces := getRuntimeNamespaces(ra)
 		log.Debugf("found namespaces %s associated with RadixRegistration %s", strings.Join(namespaces, ", "), rr.Name)
 		rdsForRr, err := getRadixDeploymentsInNamespaces(kubeClient, namespaces)
+		log.Debugf("RadixRegistration %s has %d RadixDeployments", rr.Name, len(rdsForRr))
 		if err != nil {
 			return nil, err
 		}
 		rjsForRr, err := getRadixJobsInNamespace(kubeClient, utils.GetAppNamespace(rr.Name))
+		log.Debugf("RadixRegistration %s has %d RadixJobs", rr.Name, len(rdsForRr))
 		if err != nil {
 			return nil, err
 		}
-		log.Debugf("RadixRegistration %s has %d RadixDeployments, checking them for inactivity", rr.Name, len(rdsForRr))
+
+		log.Debugf("Checking timestamps of %s's RadixDeployments and RadixJobs", rr.Name)
 		isInactive, err := rrIsInactive(rdsForRr, rjsForRr, inactivityLimit, action)
 		if err != nil {
 			return nil, err

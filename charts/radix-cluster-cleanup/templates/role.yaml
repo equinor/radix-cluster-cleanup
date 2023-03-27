@@ -12,9 +12,9 @@ rules:
   - apiGroups: ["radix.equinor.com"]
     resources: ["radixregistrations"]
     verbs: ["delete"]
-  - apiGroups: ["*"]
-    resources: ["deployments"]
-    verbs: ["patch"]
+  - apiGroups: ["radix.equinor.com"]
+    resources: ["radixdeployments"]
+    verbs: ["update"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
