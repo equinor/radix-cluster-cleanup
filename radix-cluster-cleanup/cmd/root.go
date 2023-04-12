@@ -195,7 +195,7 @@ func getTooInactiveRrs(kubeClient *kube.Kube, inactivityLimit time.Duration, act
 		}
 
 		log.Debugf("Checking timestamps of %s's RadixDeployments and RadixJobs", rr.Name)
-		isInactive, err := rrIsInactive(rdsForRr, rjsForRr, inactivityLimit, action)
+		isInactive, err := rrIsInactive(rr.CreationTimestamp, rdsForRr, rjsForRr, inactivityLimit, action)
 		if err != nil {
 			return nil, err
 		}
@@ -248,7 +248,7 @@ func isWhitelisted(rr *v1.RadixRegistration) bool {
 	return false
 }
 
-func rrIsInactive(rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit time.Duration, action string) (bool, error) {
+func rrIsInactive(rrCreationTimestamp metav1.Time, rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit time.Duration, action string) (bool, error) {
 	if len(rds) == 0 {
 		log.Debugf("no RadixDeployments found, assuming RadixRegistration is inactive")
 		return true, nil
@@ -268,8 +268,11 @@ func rrIsInactive(rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit t
 	if err != nil {
 		return false, err
 	}
+
 	log.Debugf("most recent manual user activity was %s, %d hours ago", latestUserMutationTimestamp.Format(time.RFC822), int(time.Since(latestUserMutationTimestamp.Time).Hours()))
-	lastActivity := getMostRecentTimestamp(&latestRadixJobTimestamp, latestUserMutationTimestamp, &latestRadixDeploymentTimestamp)
+	log.Debugf("most recent creation of RR was %s, %d hours ago", rrCreationTimestamp, int(time.Since(rrCreationTimestamp.Time).Hours()))
+	lastActivity := getMostRecentTimestamp(&latestRadixJobTimestamp, latestUserMutationTimestamp, &latestRadixDeploymentTimestamp, &rrCreationTimestamp)
+	log.Debugf("lastActivity was %s, %d hours ago", lastActivity, int(time.Since(lastActivity.Time).Hours()))
 	if tooLongInactivity(lastActivity, inactivityLimit) {
 		log.Infof("%s: last activity was %d hours ago, which is more than %d hours ago, marking for %s", latestRadixDeployment.Spec.AppName, int(time.Since(lastActivity.Time).Hours()), int(inactivityLimit.Hours()), action)
 		return true, nil
