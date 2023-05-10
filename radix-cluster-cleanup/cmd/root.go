@@ -249,7 +249,7 @@ func isWhitelisted(rr *v1.RadixRegistration) bool {
 }
 
 func rrIsInactive(rrCreationTimestamp metav1.Time, rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit time.Duration, action string) (bool, error) {
-	if len(rds) == 0 {
+	if len(rds) == 0 && rrCreationTimestamp.Add(inactivityLimit).Before(time.Now()) {
 		log.Debugf("no RadixDeployments found, assuming RadixRegistration is inactive")
 		return true, nil
 	}
