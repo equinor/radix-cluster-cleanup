@@ -86,6 +86,7 @@ func getWhitelist() []string {
 		"radix-servicenow-proxy",
 		"radix-networkpolicy-canary",
 		"radix-cost-allocation-api",
+		"radix-log-api",
 		"canarycicd-test1",
 		"canarycicd-test2",
 		"canarycicd-test3",
