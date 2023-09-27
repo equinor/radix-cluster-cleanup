@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/equinor/radix-acr-cleanup v0.0.0-20230727112025-cca6812fd7cd
+	github.com/equinor/radix-acr-cleanup v0.0.0-20230926103548-da1ca592e1ea
 	github.com/equinor/radix-common v1.5.0
 	github.com/equinor/radix-operator v1.43.0
 	github.com/sirupsen/logrus v1.9.3
