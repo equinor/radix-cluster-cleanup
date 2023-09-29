@@ -1,15 +1,17 @@
 module github.com/equinor/radix-cluster-cleanup
 
-go 1.20
+go 1.21
+
+toolchain go1.21.0
 
 require (
-	github.com/equinor/radix-acr-cleanup v0.0.0-20230727112025-cca6812fd7cd
-	github.com/equinor/radix-common v1.4.0
-	github.com/equinor/radix-operator v1.40.0
+	github.com/equinor/radix-acr-cleanup v0.0.0-20230926103548-da1ca592e1ea
+	github.com/equinor/radix-common v1.5.0
+	github.com/equinor/radix-operator v1.43.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.7.0
-	k8s.io/apimachinery v0.26.7
-	k8s.io/client-go v0.26.7
+	k8s.io/apimachinery v0.27.6
+	k8s.io/client-go v0.27.6
 )
 
 require (
@@ -57,8 +59,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.26.7 // indirect
-	k8s.io/apiextensions-apiserver v0.26.7 // indirect
+	k8s.io/api v0.27.6 // indirect
+	k8s.io/apiextensions-apiserver v0.27.6 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f // indirect
 	k8s.io/utils v0.0.0-20230505201702-9f6742963106 // indirect
