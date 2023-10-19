@@ -29,7 +29,7 @@ RUN addgroup -S -g 1000 radix-cluster-cleanup
 RUN adduser -S -u 1000 -G radix-cluster-cleanup radix-cluster-cleanup
 
 # Run operator
-FROM alpine
+FROM alpine:3.18.3
 COPY run_cluster_cleanup.sh /run_cluster_cleanup.sh
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd
