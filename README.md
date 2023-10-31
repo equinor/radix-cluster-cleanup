@@ -1,3 +1,6 @@
+![build workflow](https://github.com/equinor/radix-cluster-cleanup/actions/workflows/build-push.yml/badge.svg) 
+
+
 go build -o rx-cleanup
 
 LOG_LEVEL=DEBUG ./rx-cleanup --help
@@ -34,3 +37,10 @@ To generate a local version for debugging purposes, it can be built using:
 CGO_ENABLED=0 GOOS=darwin go build -ldflags "-s -w" -a -installsuffix cgo -o ./rx-cleanup
 ```
 
+### Contributing
+
+Want to contribute? Read our [contributing guidelines](./CONTRIBUTING.md)
+
+---------
+
+[Security notification](./SECURITY.md)
