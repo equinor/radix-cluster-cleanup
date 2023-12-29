@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -11,7 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"k8s.io/apimachinery/pkg/api/errors"
+	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -23,7 +24,6 @@ import (
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 
-	commonErrors "github.com/equinor/radix-common/utils/errors"
 	"github.com/equinor/radix-operator/pkg/apis/utils"
 	radixclient "github.com/equinor/radix-operator/pkg/client/clientset/versioned"
 )
@@ -136,7 +136,7 @@ func runFunctionPeriodically(someFunc func() error) error {
 	cleanupStart, cleanupStartErr := rootCmd.Flags().GetString(settings.CleanUpStartOption)
 	cleanupEnd, cleanupEndErr := rootCmd.Flags().GetString(settings.CleanUpEndOption)
 	period, periodErr := rootCmd.Flags().GetDuration(settings.CleanUpPeriodOption)
-	err := commonErrors.Concat([]error{cleanupDaysErr, cleanupStartErr, cleanupEndErr, periodErr})
+	err := errors.Join(cleanupDaysErr, cleanupStartErr, cleanupEndErr, periodErr)
 	if err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func getTooInactiveRrs(kubeClient *kube.Kube, inactivityLimit time.Duration, act
 			continue
 		}
 		ra, err := getRadixApplication(kubeClient, rr.Name)
-		if errors.IsNotFound(err) {
+		if kubeerrors.IsNotFound(err) {
 			log.Debugf("could not find RadixApplication %s, continuing...", rr.Name)
 			continue
 		}
