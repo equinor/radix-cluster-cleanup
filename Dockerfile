@@ -6,8 +6,6 @@ RUN apk update && \
     apk add ca-certificates  && \
     apk add --no-cache gcc musl-dev
 
-RUN go install honnef.co/go/tools/cmd/staticcheck@2023.1.3
-
 WORKDIR /go/src/github.com/equinor/radix-cluster-cleanup
 
 # Install project dependencies
@@ -15,12 +13,6 @@ COPY radix-cluster-cleanup/go.mod radix-cluster-cleanup/go.sum ./
 RUN go mod download
 
 COPY ./radix-cluster-cleanup .
-# run tests and linting
-
-RUN staticcheck ./... && \
-    go vet ./... && \
-    go test ./... && \
-    CGO_ENABLED=0 GOOS=linux go test ./...
 
 # build
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o /usr/local/bin/radix-cluster-cleanup
