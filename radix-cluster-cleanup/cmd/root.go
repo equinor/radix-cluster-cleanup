@@ -80,7 +80,7 @@ func init() {
 
 func initZerologger(logLevel string, prettyPrint bool) error {
 	if logLevel == "" {
-		logLevel = "info"
+		logLevel = zerolog.InfoLevel.String()
 	}
 
 	zerologLevel, err := zerolog.ParseLevel(logLevel)
