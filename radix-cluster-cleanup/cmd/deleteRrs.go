@@ -16,13 +16,14 @@ package cmd
 
 import (
 	"context"
+	"time"
+
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 var deleteRrsContinuouslyCommand = &cobra.Command{
@@ -77,6 +78,6 @@ func deleteRr(client *kube.Kube, rr v1.RadixRegistration) error {
 	if err != nil {
 		return err
 	}
-	log.Infof("Deleted RadixRegistration %s", rr.Name)
+	log.Info().Str("appName", rr.Name).Msg("Deleted RadixRegistration")
 	return nil
 }

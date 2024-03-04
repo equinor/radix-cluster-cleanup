@@ -8,4 +8,6 @@ const (
 	CleanUpEndOption                 = "cleanup-end"
 	CleanUpPeriodOption              = "period"
 	WhitelistOption                  = "whitelisted-rrs"
+	PrettyPrint                      = "pretty-print"
+	LogLevel                         = "log-level"
 )
