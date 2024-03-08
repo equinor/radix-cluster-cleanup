@@ -16,15 +16,16 @@ package cmd
 
 import (
 	"context"
+	"strings"
+	"time"
+
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	"github.com/equinor/radix-operator/pkg/apis/utils/numbers"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"strings"
-	"time"
 )
 
 var stopRrsContinuouslyCommand = &cobra.Command{
@@ -98,7 +99,7 @@ func scaleRdComponentsToZeroReplicas(kubeClient *kube.Kube, rd v1.RadixDeploymen
 		componentNames = append(componentNames, rd.Spec.Components[i].Name)
 	}
 	_, err := kubeClient.RadixClient().RadixV1().RadixDeployments(rd.Namespace).Update(context.TODO(), &rd, metav1.UpdateOptions{})
-	log.Infof("scaled component %s in rd %s to 0 replicas", strings.Join(componentNames, ", "), rd.Name)
+	log.Info().Str("appName", rd.Spec.AppName).Str("deployment", rd.Name).Msgf("scaled component %s in rd %s to 0 replicas", strings.Join(componentNames, ", "), rd.Name)
 	if err != nil {
 		return err
 	}
