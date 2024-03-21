@@ -98,7 +98,7 @@ func initZerologger(logLevel string, prettyPrint bool) error {
 func getWhitelist() []string {
 	hardcodedWhitelist := []string{
 		"radix-api",
-		"radix-platform",
+		"radix-public-site",
 		"radix-web-console",
 		"radix-vulnerability-scanner",
 		"radix-github-webhook",
