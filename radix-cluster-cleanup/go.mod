@@ -5,9 +5,9 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/equinor/radix-acr-cleanup v0.0.0-20240304072621-7478cec4fb11
-	github.com/equinor/radix-operator v1.50.2
-	github.com/rs/zerolog v1.31.0
+	github.com/equinor/radix-acr-cleanup v0.0.0-20240311082036-1512e0ae5441
+	github.com/equinor/radix-operator v1.50.4
+	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
 	k8s.io/apimachinery v0.29.0
 	k8s.io/client-go v0.29.0
@@ -49,7 +49,6 @@ require (
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
