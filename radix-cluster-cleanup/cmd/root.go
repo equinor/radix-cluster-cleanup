@@ -10,6 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
+	"github.com/equinor/radix-common/utils/delaytick"
+	"github.com/equinor/radix-common/utils/timewindow"
+	"github.com/equinor/radix-operator/pkg/apis/kube"
+	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -18,12 +23,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/equinor/radix-acr-cleanup/pkg/delaytick"
-	"github.com/equinor/radix-acr-cleanup/pkg/timewindow"
-	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
-	"github.com/equinor/radix-operator/pkg/apis/kube"
-	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 
 	"github.com/equinor/radix-operator/pkg/apis/utils"
 	radixclient "github.com/equinor/radix-operator/pkg/client/clientset/versioned"
@@ -52,12 +51,13 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		return initZerologger(logLevel, prettyPrint)
+		return initZeroLogger(logLevel, prettyPrint)
 	},
 }
 
 // Execute the top level command
-func Execute() {
+func Execute(ctx context.Context) {
+	rootCmd.SetContext(ctx)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println("parsing command line arguments failed:", err)
 		fmt.Println(err)
@@ -78,7 +78,7 @@ func init() {
 	rootCmd.PersistentFlags().String(settings.LogLevel, "info", "Set output log level, allowed values: debug, info, warn, error or fatal")
 }
 
-func initZerologger(logLevel string, prettyPrint bool) error {
+func initZeroLogger(logLevel string, prettyPrint bool) error {
 	if logLevel == "" {
 		logLevel = zerolog.InfoLevel.String()
 	}
@@ -145,14 +145,14 @@ func getKubernetesClient() (kubernetes.Interface, radixclient.Interface) {
 
 func getKubeUtil() (*kube.Kube, error) {
 	kubeClient, radixClient := getKubernetesClient()
-	kubeutil, err := kube.New(kubeClient, radixClient, nil)
+	kubeutil, err := kube.New(kubeClient, radixClient, nil, nil)
 	if err != nil {
 		return nil, err
 	}
 	return kubeutil, nil
 }
 
-func runFunctionPeriodically(someFunc func() error) error {
+func runFunctionPeriodically(ctx context.Context, someFunc func(ctx context.Context) error) error {
 	cleanupDays, cleanupDaysErr := rootCmd.Flags().GetStringSlice(settings.CleanUpDaysOption)
 	cleanupStart, cleanupStartErr := rootCmd.Flags().GetString(settings.CleanUpStartOption)
 	cleanupEnd, cleanupEndErr := rootCmd.Flags().GetString(settings.CleanUpEndOption)
@@ -172,7 +172,7 @@ func runFunctionPeriodically(someFunc func() error) error {
 		pointInTime := time.Now()
 		if window.Contains(pointInTime) {
 			log.Info().Msgf("Start listing RRs for stop %s", pointInTime)
-			err := someFunc()
+			err := someFunc(ctx)
 			if err != nil {
 				return err
 			}
@@ -184,8 +184,8 @@ func runFunctionPeriodically(someFunc func() error) error {
 	return nil
 }
 
-func getTooInactiveRrs(kubeClient *kube.Kube, inactivityLimit time.Duration, action string) ([]v1.RadixRegistration, error) {
-	rrs, err := kubeClient.ListRegistrations()
+func getTooInactiveRrs(ctx context.Context, kubeClient *kube.Kube, inactivityLimit time.Duration, action string) ([]v1.RadixRegistration, error) {
+	rrs, err := kubeClient.ListRegistrations(ctx)
 	if err != nil {
 		return nil, err
 	}

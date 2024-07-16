@@ -15,9 +15,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"time"
+
+	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 
 	"github.com/spf13/cobra"
 )
@@ -27,7 +29,7 @@ var listRrsForDeletionContinuouslyCommand = &cobra.Command{
 	Short: "Continuously lists RadixRegistrations which qualify for deletion",
 	Long:  "Continuously lists RadixRegistrations which qualify for deletion.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runFunctionPeriodically(listRrsForDeletion)
+		return runFunctionPeriodically(cmd.Context(), listRrsForDeletion)
 	},
 }
 
@@ -36,11 +38,11 @@ var listRrsForDeletionCommand = &cobra.Command{
 	Short: "Lists RadixRegistrations which qualify for deletion",
 	Long:  "Lists RadixRegistrations which qualify for deletion.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return listRrsForDeletion()
+		return listRrsForDeletion(cmd.Context())
 	},
 }
 
-func listRrsForDeletion() error {
+func listRrsForDeletion(ctx context.Context) error {
 	kubeClient, err := getKubeUtil()
 	if err != nil {
 		return err
@@ -51,7 +53,7 @@ func listRrsForDeletion() error {
 		return err
 	}
 	inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
-	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeDeletion, action)
+	tooInactiveRrs, err := getTooInactiveRrs(ctx, kubeClient, inactivityBeforeDeletion, action)
 	if err != nil {
 		return err
 	}

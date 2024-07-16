@@ -31,7 +31,7 @@ var deleteRrsContinuouslyCommand = &cobra.Command{
 	Short: "Continuously delete inactive RadixRegistrations",
 	Long:  "Continuously delete inactive RadixRegistrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runFunctionPeriodically(deleteRrs)
+		return runFunctionPeriodically(cmd.Context(), deleteRrs)
 	},
 }
 
@@ -40,7 +40,7 @@ var deleteRrsCommand = &cobra.Command{
 	Short: "Delete inactive RadixRegistrations",
 	Long:  "Delete inactive RadixRegistrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return deleteRrs()
+		return deleteRrs(cmd.Context())
 	},
 }
 
@@ -49,7 +49,7 @@ func init() {
 	rootCmd.AddCommand(deleteRrsContinuouslyCommand)
 }
 
-func deleteRrs() error {
+func deleteRrs(ctx context.Context) error {
 	kubeClient, err := getKubeUtil()
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func deleteRrs() error {
 		return err
 	}
 	inactivityBeforeDeletion := time.Hour * 24 * time.Duration(inactiveDaysBeforeDeletion)
-	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeDeletion, action)
+	tooInactiveRrs, err := getTooInactiveRrs(ctx, kubeClient, inactivityBeforeDeletion, action)
 	if err != nil {
 		return err
 	}

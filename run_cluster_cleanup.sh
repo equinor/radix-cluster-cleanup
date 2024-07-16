@@ -1,5 +1,5 @@
 #!/bin/sh
-LOG_LEVEL=${LOG_LEVEL} /radix-cluster-cleanup "${COMMAND}" \
+LOG_LEVEL=${LOG_LEVEL} ./radix-cluster-cleanup "${COMMAND}" \
   --period=${PERIOD} \
   --cleanup-start=${CLEANUP_START} \
   --cleanup-end=${CLEANUP_END} \
