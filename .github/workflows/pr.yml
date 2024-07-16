@@ -3,6 +3,7 @@ on:
   pull_request:
     branches:
     - master
+    - set-arm64-platform
 jobs:
   build:
     name: pull-request-check
