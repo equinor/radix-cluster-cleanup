@@ -28,11 +28,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: './radix-cluster-cleanup/go.mod'
+          go-version-file: 'go.mod'
       - name: Install dependencies
-        run: go mod download
+        run: |
+          cd ./radix-cluster-cleanup
+          go mod download
       - name: Run Tests
-        run: go test -cover `go list ./radix-cluster-cleanup/...`
+        run: |
+          cd ./radix-cluster-cleanup
+          go test -cover `go list ./...`
 
   lint:
     name: Lint
