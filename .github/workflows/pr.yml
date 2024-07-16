@@ -48,6 +48,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: './radix-cluster-cleanup/go.mod'
+      - name: Change folder
+        run: cd ./radix-cluster-cleanup
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
