@@ -24,8 +24,8 @@ jobs:
 
         - name: "playground"
           ref: "refs/heads/release"
-          acr-name: "radixdev"
-          client-id: "bc7934db-95bc-40b0-b9b8-c0944b0f6937"
+          acr-name: "radixplayground"
+          client-id: "7c000a42-1edb-4491-a241-4ac77bf7dd6d"
           subscription-id: "16ede44b-1f74-40a5-b428-46cca9a5741b"
 
         - name: "platform"
