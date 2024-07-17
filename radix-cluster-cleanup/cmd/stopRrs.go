@@ -33,7 +33,7 @@ var stopRrsContinuouslyCommand = &cobra.Command{
 	Short: "Continuously stop all components in inactive RadixRegistrations",
 	Long:  "Continuously stop all components in inactive RadixRegistrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runFunctionPeriodically(stopRrs)
+		return runFunctionPeriodically(cmd.Context(), stopRrs)
 	},
 }
 
@@ -42,11 +42,11 @@ var stopRrsCommand = &cobra.Command{
 	Short: "Stop all components in inactive RadixRegistrations",
 	Long:  "Stop all components in inactive RadixRegistrations",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return stopRrs()
+		return stopRrs(cmd.Context())
 	},
 }
 
-func stopRrs() error {
+func stopRrs(ctx context.Context) error {
 	kubeClient, err := getKubeUtil()
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func stopRrs() error {
 		return err
 	}
 	inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
-	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
+	tooInactiveRrs, err := getTooInactiveRrs(ctx, kubeClient, inactivityBeforeStop, action)
 	if err != nil {
 		return err
 	}

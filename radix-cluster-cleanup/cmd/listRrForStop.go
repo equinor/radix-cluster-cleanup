@@ -15,9 +15,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
-	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"time"
+
+	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 
 	"github.com/spf13/cobra"
 )
@@ -27,7 +29,7 @@ var listRrsForStopContinuouslyCommand = &cobra.Command{
 	Short: "Continuously list RadixRegistrations which qualify for stop",
 	Long:  "Continuously list RadixRegistrations which qualify for stop",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runFunctionPeriodically(listRrsForStop)
+		return runFunctionPeriodically(cmd.Context(), listRrsForStop)
 	},
 }
 
@@ -36,11 +38,11 @@ var listRrsForStopCommand = &cobra.Command{
 	Short: "Lists RadixRegistrations which qualify for stop",
 	Long:  "Lists RadixRegistrations which qualify for stop.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return listRrsForStop()
+		return listRrsForStop(cmd.Context())
 	},
 }
 
-func listRrsForStop() error {
+func listRrsForStop(ctx context.Context) error {
 	kubeClient, err := getKubeUtil()
 	if err != nil {
 		return err
@@ -51,7 +53,7 @@ func listRrsForStop() error {
 		return err
 	}
 	inactivityBeforeStop := time.Hour * 24 * time.Duration(inactiveDaysBeforeStop)
-	tooInactiveRrs, err := getTooInactiveRrs(kubeClient, inactivityBeforeStop, action)
+	tooInactiveRrs, err := getTooInactiveRrs(ctx, kubeClient, inactivityBeforeStop, action)
 	if err != nil {
 		return err
 	}
