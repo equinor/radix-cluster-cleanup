@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,16 +25,16 @@ var listRrsForStopAndDeletionContinuouslyCommand = &cobra.Command{
 	Short: "Continuously list RadixRegistrations which qualify for stop and deletion",
 	Long:  "Continuously list RadixRegistrations which qualify for stop and deletion",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runFunctionPeriodically(listRrsForStopAndDeletion)
+		return runFunctionPeriodically(cmd.Context(), listRrsForStopAndDeletion)
 	},
 }
 
-func listRrsForStopAndDeletion() error {
-	err := listRrsForStop()
+func listRrsForStopAndDeletion(ctx context.Context) error {
+	err := listRrsForStop(ctx)
 	if err != nil {
 		return err
 	}
-	return listRrsForDeletion()
+	return listRrsForDeletion(ctx)
 }
 
 func init() {

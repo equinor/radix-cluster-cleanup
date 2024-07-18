@@ -15,6 +15,8 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,16 +25,16 @@ var StopAndDeleteRrsContinuouslyCommand = &cobra.Command{
 	Short: "Continuously stop and delete inactive RRs",
 	Long:  "Continuously stop and delete inactive RRs",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return runFunctionPeriodically(stopAndDeleteInactiveRrs)
+		return runFunctionPeriodically(cmd.Context(), stopAndDeleteInactiveRrs)
 	},
 }
 
-func stopAndDeleteInactiveRrs() error {
-	err := stopRrs()
+func stopAndDeleteInactiveRrs(ctx context.Context) error {
+	err := stopRrs(ctx)
 	if err != nil {
 		return err
 	}
-	return deleteRrs()
+	return deleteRrs(ctx)
 }
 
 func init() {

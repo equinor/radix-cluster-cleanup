@@ -1,30 +1,27 @@
-FROM golang:1.21-alpine3.19 as builder
+FROM docker.io/golang:1.22.5-alpine3.20 AS builder
 
-ENV GO111MODULE=on
+ENV CGO_ENABLED=0 \
+    GOOS=linux
 
-RUN apk update && \
-    apk add ca-certificates  && \
-    apk add --no-cache gcc musl-dev
-
-WORKDIR /go/src/github.com/equinor/radix-cluster-cleanup
+WORKDIR /src
 
 # Install project dependencies
-COPY radix-cluster-cleanup/go.mod radix-cluster-cleanup/go.sum ./
+COPY ./radix-cluster-cleanup/go.mod ./radix-cluster-cleanup/go.sum ./
 RUN go mod download
 
+# Copy and build project code
 COPY ./radix-cluster-cleanup .
+RUN go build -ldflags="-s -w" -o /build/radix-cluster-cleanup
 
-# build
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w" -a -installsuffix cgo -o /usr/local/bin/radix-cluster-cleanup
+COPY ./run_cluster_cleanup.sh .
 
-RUN addgroup -S -g 1000 radix-cluster-cleanup
-RUN adduser -S -u 1000 -G radix-cluster-cleanup radix-cluster-cleanup
-
-# Run operator
-FROM alpine:3
-COPY run_cluster_cleanup.sh /run_cluster_cleanup.sh
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /usr/local/bin/radix-cluster-cleanup /radix-cluster-cleanup
-USER radix-cluster-cleanup
-ENTRYPOINT ["/run_cluster_cleanup.sh"]
+#Get busybox shell for distroless
+FROM gcr.io/distroless/base:debug AS debug
+# Final stage, ref https://github.com/GoogleContainerTools/distroless/blob/main/base/README.md for distroless
+FROM gcr.io/distroless/static
+WORKDIR /app
+COPY --from=builder /build/radix-cluster-cleanup .
+COPY --from=builder /src/run_cluster_cleanup.sh .
+COPY --from=debug /busybox/sh /bin
+USER 1000
+ENTRYPOINT ["/app/run_cluster_cleanup.sh"]
