@@ -1,4 +1,4 @@
-![build workflow](https://github.com/equinor/radix-cluster-cleanup/actions/workflows/build-push.yml/badge.svg) 
+![build workflow](https://github.com/equinor/radix-cluster-cleanup/actions/workflows/build-push.yml/badge.svg) [![SCM Compliance](https://scm-compliance-api.radix.equinor.com/repos/equinor/8de2870b-4681-4c54-8f5e-2cb7a85f3201/badge)](https://developer.equinor.com/governance/scm-policy/)
 
 
 go build -o rx-cleanup
