@@ -1,4 +1,8 @@
-![build workflow](https://github.com/equinor/radix-cluster-cleanup/actions/workflows/build-push.yml/badge.svg) 
+![build workflow](https://github.com/equinor/radix-cluster-cleanup/actions/workflows/build-push.yml/badge.svg) [![SCM Compliance](https://scm-compliance-api.radix.equinor.com/repos/equinor/radix-cluster-cleanup/badge)](https://developer.equinor.com/governance/scm-policy/)
+
+# Radix Cluster Cleanup
+
+Keeps the Playground cluster tidy, stops and deletes "unused" applications.
 
 
 go build -o rx-cleanup
