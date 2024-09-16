@@ -20,9 +20,9 @@ import (
 	"time"
 
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
+	"github.com/equinor/radix-common/utils/pointers"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
-	"github.com/equinor/radix-operator/pkg/apis/utils/numbers"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -95,7 +95,7 @@ func stopRr(kubeClient *kube.Kube, rr v1.RadixRegistration) error {
 func scaleRdComponentsToZeroReplicas(kubeClient *kube.Kube, rd v1.RadixDeployment) error {
 	componentNames := make([]string, 0)
 	for i := range rd.Spec.Components {
-		rd.Spec.Components[i].Replicas = numbers.IntPtr(0)
+		rd.Spec.Components[i].ReplicasOverride = pointers.Ptr(0)
 		componentNames = append(componentNames, rd.Spec.Components[i].Name)
 	}
 	_, err := kubeClient.RadixClient().RadixV1().RadixDeployments(rd.Namespace).Update(context.TODO(), &rd, metav1.UpdateOptions{})
