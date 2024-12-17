@@ -92,6 +92,7 @@ func initZeroLogger(logLevel string, prettyPrint bool) error {
 	if prettyPrint {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.TimeOnly})
 	}
+	zerolog.DefaultContextLogger = &log.Logger
 	return nil
 }
 
@@ -139,7 +140,7 @@ func getKubernetesClient() (kubernetes.Interface, radixclient.Interface) {
 		log.Fatal().Err(err).Msg("getClusterConfig radix client")
 	}
 
-	log.Printf("Successfully constructed k8s client to API server %v", config.Host)
+	log.Info().Msgf("Successfully constructed k8s client to API server %v", config.Host)
 	return client, radixClient
 }
 
@@ -153,6 +154,7 @@ func getKubeUtil() (*kube.Kube, error) {
 }
 
 func runFunctionPeriodically(ctx context.Context, someFunc func(ctx context.Context) error) error {
+	logger := log.Ctx(ctx)
 	cleanupDays, cleanupDaysErr := rootCmd.Flags().GetStringSlice(settings.CleanUpDaysOption)
 	cleanupStart, cleanupStartErr := rootCmd.Flags().GetString(settings.CleanUpStartOption)
 	cleanupEnd, cleanupEndErr := rootCmd.Flags().GetString(settings.CleanUpEndOption)
@@ -164,60 +166,64 @@ func runFunctionPeriodically(ctx context.Context, someFunc func(ctx context.Cont
 	timezone := "Local"
 	window, err := timewindow.New(cleanupDays, cleanupStart, cleanupEnd, timezone)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to build time window")
+		logger.Fatal().Err(err).Msg("Failed to build time window")
 	}
 	source := rand.NewSource(time.Now().UnixNano())
 	tick := delaytick.New(source, period)
 	for range tick {
 		pointInTime := time.Now()
 		if window.Contains(pointInTime) {
-			log.Info().Msgf("Start listing RRs for stop %s", pointInTime)
+			logger.Info().Msgf("Start listing RRs for stop %s", pointInTime)
 			err := someFunc(ctx)
 			if err != nil {
 				return err
 			}
 		} else {
-			log.Info().Msgf("%s is outside of window. Continue sleeping", pointInTime)
+			logger.Info().Msgf("%s is outside of window. Continue sleeping", pointInTime)
 		}
 	}
-	log.Warn().Msgf("execution reached code which was presumably after an inescapable loop")
+	logger.Warn().Msgf("execution reached code which was presumably after an inescapable loop")
 	return nil
 }
 
 func getTooInactiveRrs(ctx context.Context, kubeClient *kube.Kube, inactivityLimit time.Duration, action string) ([]v1.RadixRegistration, error) {
+	logger := log.Ctx(ctx)
 	rrs, err := kubeClient.ListRegistrations(ctx)
 	if err != nil {
 		return nil, err
 	}
 	var rrsForDeletion []v1.RadixRegistration
 	for _, rr := range rrs {
+		logger := logger.With().Str("appName", rr.Name).Logger()
+		ctx = logger.WithContext(ctx)
+
 		if isWhitelisted(rr) {
-			log.Debug().Str("appName", rr.Name).Msg("RadixRegistration is whitelisted, skipping")
+			logger.Debug().Msg("RadixRegistration is whitelisted, skipping")
 			continue
 		}
-		ra, err := getRadixApplication(kubeClient, rr.Name)
+		ra, err := getRadixApplication(ctx, kubeClient, rr.Name)
 		if kubeerrors.IsNotFound(err) {
-			log.Debug().Str("appName", rr.Name).Msg("could not find RadixApplication, continuing...")
+			logger.Debug().Msg("could not find RadixApplication, continuing...")
 			continue
 		}
 		if err != nil {
 			return nil, err
 		}
 		namespaces := getRuntimeNamespaces(ra)
-		log.Debug().Str("appName", rr.Name).Msgf("found namespaces %s associated with RadixRegistration", strings.Join(namespaces, ", "))
-		rdsForRr, err := getRadixDeploymentsInNamespaces(kubeClient, namespaces)
-		log.Debug().Str("appName", rr.Name).Msgf("RadixRegistration has %d RadixDeployments", len(rdsForRr))
+		logger.Debug().Msgf("found namespaces %s associated with RadixRegistration", strings.Join(namespaces, ", "))
+		rdsForRr, err := getRadixDeploymentsInNamespaces(ctx, kubeClient, namespaces)
 		if err != nil {
 			return nil, err
 		}
-		rjsForRr, err := getRadixJobsInNamespace(kubeClient, utils.GetAppNamespace(rr.Name))
-		log.Debug().Str("appName", rr.Name).Msgf("RadixRegistration has %d RadixJobs", len(rdsForRr))
+		logger.Debug().Msgf("RadixRegistration has %d RadixDeployments", len(rdsForRr))
+		rjsForRr, err := getRadixJobsInNamespace(ctx, kubeClient, utils.GetAppNamespace(rr.Name))
+		logger.Debug().Msgf("RadixRegistration has %d RadixJobs", len(rdsForRr))
 		if err != nil {
 			return nil, err
 		}
 
-		log.Debug().Str("appName", rr.Name).Msg("Checking timestamps of RadixDeployments and RadixJobs")
-		isInactive, err := rrIsInactive(rr.CreationTimestamp, rdsForRr, rjsForRr, inactivityLimit, action)
+		logger.Debug().Msg("Checking timestamps of RadixDeployments and RadixJobs")
+		isInactive, err := rrIsInactive(ctx, rr.CreationTimestamp, rdsForRr, rjsForRr, inactivityLimit, action)
 		if err != nil {
 			return nil, err
 		}
@@ -228,18 +234,18 @@ func getTooInactiveRrs(ctx context.Context, kubeClient *kube.Kube, inactivityLim
 	return rrsForDeletion, nil
 }
 
-func getRadixJobsInNamespace(kubeClient *kube.Kube, namespace string) ([]v1.RadixJob, error) {
-	rjs, err := kubeClient.RadixClient().RadixV1().RadixJobs(namespace).List(context.TODO(), metav1.ListOptions{})
+func getRadixJobsInNamespace(ctx context.Context, kubeClient *kube.Kube, namespace string) ([]v1.RadixJob, error) {
+	rjs, err := kubeClient.RadixClient().RadixV1().RadixJobs(namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
 	return rjs.Items, nil
 }
 
-func getRadixDeploymentsInNamespaces(kubeClient *kube.Kube, namespaces []string) ([]v1.RadixDeployment, error) {
+func getRadixDeploymentsInNamespaces(ctx context.Context, kubeClient *kube.Kube, namespaces []string) ([]v1.RadixDeployment, error) {
 	rdsForRr := make([]v1.RadixDeployment, 0)
 	for _, ns := range namespaces {
-		rds, err := kubeClient.RadixClient().RadixV1().RadixDeployments(ns).List(context.TODO(), metav1.ListOptions{})
+		rds, err := kubeClient.RadixClient().RadixV1().RadixDeployments(ns).List(ctx, metav1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}
@@ -256,8 +262,8 @@ func getRuntimeNamespaces(ra *v1.RadixApplication) []string {
 	return namespaces
 }
 
-func getRadixApplication(kubeClient *kube.Kube, appName string) (*v1.RadixApplication, error) {
-	return kubeClient.RadixClient().RadixV1().RadixApplications(utils.GetAppNamespace(appName)).Get(context.TODO(), appName, metav1.GetOptions{})
+func getRadixApplication(ctx context.Context, kubeClient *kube.Kube, appName string) (*v1.RadixApplication, error) {
+	return kubeClient.RadixClient().RadixV1().RadixApplications(utils.GetAppNamespace(appName)).Get(ctx, appName, metav1.GetOptions{})
 }
 
 func isWhitelisted(rr *v1.RadixRegistration) bool {
@@ -270,20 +276,27 @@ func isWhitelisted(rr *v1.RadixRegistration) bool {
 	return false
 }
 
-func rrIsInactive(rrCreationTimestamp metav1.Time, rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit time.Duration, action string) (bool, error) {
-	if len(rds) == 0 && rrCreationTimestamp.Add(inactivityLimit).Before(time.Now()) {
-		log.Debug().Msgf("no RadixDeployments found, assuming RadixRegistration is inactive")
+func rrIsInactive(ctx context.Context, rrCreationTimestamp metav1.Time, rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit time.Duration, action string) (bool, error) {
+	logger := log.Ctx(ctx)
+	if rrCreationTimestamp.Add(inactivityLimit).After(time.Now()) {
+		logger.Debug().Msgf("RadixRegistration is newer than inactivity limit, assuming active")
+		return false, nil
+	}
+
+	if len(rds) == 0 {
+		logger.Debug().Msgf("no RadixDeployments found, assuming RadixRegistration is inactive")
 		return true, nil
 	}
+
 	latestRadixDeployment := SortDeploymentsByActiveFromTimestampAsc(rds)[len(rds)-1]
 	latestRadixDeploymentTimestamp := latestRadixDeployment.Status.ActiveFrom
-	log.Debug().Str("appName", latestRadixDeployment.Spec.AppName).Msgf("most recent radixDeployment is %s, active from %s, %d hours ago", latestRadixDeployment.Name, latestRadixDeploymentTimestamp.Format(time.RFC822), int(time.Since(latestRadixDeploymentTimestamp.Time).Hours()))
+	logger.Debug().Msgf("most recent radixDeployment is %s, active from %s, %d hours ago", latestRadixDeployment.Name, latestRadixDeploymentTimestamp.Format(time.RFC822), int(time.Since(latestRadixDeploymentTimestamp.Time).Hours()))
 
 	latestRadixJobTimestamp := metav1.Time{Time: time.Unix(0, 0)}
 	latestRadixJob := getLatestRadixJob(rjs)
 	if latestRadixJob != nil {
 		latestRadixJobTimestamp = *latestRadixJob.Status.Created
-		log.Debug().Str("appName", latestRadixDeployment.Spec.AppName).Msgf("most recent radixJob was %s, created %s, %d hours ago", latestRadixJob.Name, latestRadixJobTimestamp.Format(time.RFC822), int(time.Since(latestRadixJobTimestamp.Time).Hours()))
+		logger.Debug().Msgf("most recent radixJob was %s, created %s, %d hours ago", latestRadixJob.Name, latestRadixJobTimestamp.Format(time.RFC822), int(time.Since(latestRadixJobTimestamp.Time).Hours()))
 	}
 
 	latestUserMutationTimestamp, err := getLastUserMutationTimestamp(latestRadixDeployment)
@@ -291,12 +304,12 @@ func rrIsInactive(rrCreationTimestamp metav1.Time, rds []v1.RadixDeployment, rjs
 		return false, err
 	}
 
-	log.Debug().Str("appName", latestRadixDeployment.Spec.AppName).Msgf("most recent manual user activity was %s, %d hours ago", latestUserMutationTimestamp.Format(time.RFC822), int(time.Since(latestUserMutationTimestamp.Time).Hours()))
-	log.Debug().Str("appName", latestRadixDeployment.Spec.AppName).Msgf("most recent creation of RR was %s, %d hours ago", rrCreationTimestamp, int(time.Since(rrCreationTimestamp.Time).Hours()))
+	logger.Debug().Msgf("most recent manual user activity was %s, %d hours ago", latestUserMutationTimestamp.Format(time.RFC822), int(time.Since(latestUserMutationTimestamp.Time).Hours()))
+	logger.Debug().Msgf("most recent creation of RR was %s, %d hours ago", rrCreationTimestamp, int(time.Since(rrCreationTimestamp.Time).Hours()))
 	lastActivity := getMostRecentTimestamp(&latestRadixJobTimestamp, latestUserMutationTimestamp, &latestRadixDeploymentTimestamp, &rrCreationTimestamp)
-	log.Debug().Str("appName", latestRadixDeployment.Spec.AppName).Msgf("lastActivity was %s, %d hours ago", lastActivity, int(time.Since(lastActivity.Time).Hours()))
+	logger.Debug().Msgf("lastActivity was %s, %d hours ago", lastActivity, int(time.Since(lastActivity.Time).Hours()))
 	if tooLongInactivity(lastActivity, inactivityLimit) {
-		log.Info().Str("appName", latestRadixDeployment.Spec.AppName).Msgf("last activity was %d hours ago, which is more than %d hours ago, marking for %s", int(time.Since(lastActivity.Time).Hours()), int(inactivityLimit.Hours()), action)
+		logger.Debug().Msgf("last activity was %d hours ago, which is more than %d hours ago, marking for %s", int(time.Since(lastActivity.Time).Hours()), int(inactivityLimit.Hours()), action)
 		return true, nil
 	}
 	return false, nil
@@ -352,10 +365,12 @@ func isRJ1CreatedAfterRJ2(rj1 *v1.RadixJob, rj2 *v1.RadixJob) bool {
 }
 
 func SortDeploymentsByActiveFromTimestampAsc(rds []v1.RadixDeployment) []v1.RadixDeployment {
-	sort.Slice(rds, func(i, j int) bool {
-		return isRD1ActiveAfterRD2(&rds[j], &rds[i])
+	target := make([]v1.RadixDeployment, len(rds))
+	copy(target, rds)
+	sort.Slice(target, func(i, j int) bool {
+		return isRD1ActiveAfterRD2(&target[j], &target[i])
 	})
-	return rds
+	return target
 }
 
 func isRD1ActiveAfterRD2(rd1 *v1.RadixDeployment, rd2 *v1.RadixDeployment) bool {
