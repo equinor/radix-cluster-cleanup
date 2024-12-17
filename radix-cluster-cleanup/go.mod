@@ -5,8 +5,8 @@ go 1.22.0
 toolchain go1.22.5
 
 require (
-	github.com/equinor/radix-common v1.9.4
-	github.com/equinor/radix-operator v1.58.3
+	github.com/equinor/radix-common v1.9.5
+	github.com/equinor/radix-operator v1.68.1
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
 	k8s.io/apimachinery v0.31.0
