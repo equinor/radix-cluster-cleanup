@@ -65,7 +65,7 @@ func deleteRrs(ctx context.Context) error {
 		return err
 	}
 	for _, rr := range tooInactiveRrs {
-		err := deleteRr(kubeClient, rr)
+		err := deleteRr(ctx, kubeClient, rr)
 		if err != nil {
 			return err
 		}
@@ -73,8 +73,8 @@ func deleteRrs(ctx context.Context) error {
 	return nil
 }
 
-func deleteRr(client *kube.Kube, rr v1.RadixRegistration) error {
-	err := client.RadixClient().RadixV1().RadixRegistrations().Delete(context.TODO(), rr.Name, metav1.DeleteOptions{})
+func deleteRr(ctx context.Context, client *kube.Kube, rr v1.RadixRegistration) error {
+	err := client.RadixClient().RadixV1().RadixRegistrations().Delete(ctx, rr.Name, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}

@@ -15,5 +15,4 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGTERM)
 	defer cancel()
 	cmd.Execute(ctx)
-	<-ctx.Done()
 }

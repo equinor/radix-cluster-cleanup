@@ -21,6 +21,7 @@ import (
 
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
 	"github.com/equinor/radix-common/utils/pointers"
+	"github.com/equinor/radix-common/utils/slice"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	"github.com/rs/zerolog/log"
@@ -62,7 +63,8 @@ func stopRrs(ctx context.Context) error {
 		return err
 	}
 	for _, rr := range tooInactiveRrs {
-		err := stopRr(kubeClient, rr)
+		ctx = log.Ctx(ctx).With().Str("appName", rr.Name).Logger().WithContext(ctx)
+		err := stopRr(ctx, kubeClient, rr)
 		if err != nil {
 			return err
 		}
@@ -70,36 +72,36 @@ func stopRrs(ctx context.Context) error {
 	return nil
 }
 
-func stopRr(kubeClient *kube.Kube, rr v1.RadixRegistration) error {
-	ra, err := getRadixApplication(kubeClient, rr.Name)
+func stopRr(ctx context.Context, kubeClient *kube.Kube, rr v1.RadixRegistration) error {
+	ra, err := getRadixApplication(ctx, kubeClient, rr.Name)
 	if err != nil {
 		return err
 	}
 	namespaces := getRuntimeNamespaces(ra)
-	rdsForRr, err := getRadixDeploymentsInNamespaces(kubeClient, namespaces)
-	for _, rd := range rdsForRr {
-		isActive := rdIsActive(rd)
-		if err != nil {
+	rdsForRr, err := getRadixDeploymentsInNamespaces(ctx, kubeClient, namespaces)
+	if err != nil {
+		return err
+	}
+
+	for _, rd := range slice.FindAll(rdsForRr, rdIsActive) {
+		ctx = log.Ctx(ctx).With().Str("deployment", rd.Name).Logger().WithContext(ctx)
+		if err := scaleRdComponentsToZeroReplicas(ctx, kubeClient, rd); err != nil {
 			return err
 		}
-		if isActive {
-			err := scaleRdComponentsToZeroReplicas(kubeClient, rd)
-			if err != nil {
-				return err
-			}
-		}
 	}
+
 	return nil
 }
 
-func scaleRdComponentsToZeroReplicas(kubeClient *kube.Kube, rd v1.RadixDeployment) error {
+func scaleRdComponentsToZeroReplicas(ctx context.Context, kubeClient *kube.Kube, rd v1.RadixDeployment) error {
+	logger := log.Ctx(ctx)
 	componentNames := make([]string, 0)
 	for i := range rd.Spec.Components {
 		rd.Spec.Components[i].ReplicasOverride = pointers.Ptr(0)
 		componentNames = append(componentNames, rd.Spec.Components[i].Name)
 	}
-	_, err := kubeClient.RadixClient().RadixV1().RadixDeployments(rd.Namespace).Update(context.TODO(), &rd, metav1.UpdateOptions{})
-	log.Info().Str("appName", rd.Spec.AppName).Str("deployment", rd.Name).Msgf("scaled component %s in rd %s to 0 replicas", strings.Join(componentNames, ", "), rd.Name)
+	_, err := kubeClient.RadixClient().RadixV1().RadixDeployments(rd.Namespace).Update(ctx, &rd, metav1.UpdateOptions{})
+	logger.Info().Msgf("scaled components %s to 0 replicas", strings.Join(componentNames, ", "))
 	if err != nil {
 		return err
 	}
