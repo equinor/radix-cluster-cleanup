@@ -62,8 +62,9 @@ func stopRrs(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	for _, rr := range tooInactiveRrs {
-		ctx = log.Ctx(ctx).With().Str("appName", rr.Name).Logger().WithContext(ctx)
+		ctx := log.Ctx(ctx).With().Str("appName", rr.Name).Logger().WithContext(ctx)
 		err := stopRr(ctx, kubeClient, rr)
 		if err != nil {
 			return err
@@ -84,7 +85,7 @@ func stopRr(ctx context.Context, kubeClient *kube.Kube, rr v1.RadixRegistration)
 	}
 
 	for _, rd := range slice.FindAll(rdsForRr, rdIsActive) {
-		ctx = log.Ctx(ctx).With().Str("deployment", rd.Name).Logger().WithContext(ctx)
+		ctx := log.Ctx(ctx).With().Str("deployment", rd.Name).Logger().WithContext(ctx)
 		if err := scaleRdComponentsToZeroReplicas(ctx, kubeClient, rd); err != nil {
 			return err
 		}
@@ -101,10 +102,10 @@ func scaleRdComponentsToZeroReplicas(ctx context.Context, kubeClient *kube.Kube,
 		componentNames = append(componentNames, rd.Spec.Components[i].Name)
 	}
 	_, err := kubeClient.RadixClient().RadixV1().RadixDeployments(rd.Namespace).Update(ctx, &rd, metav1.UpdateOptions{})
-	logger.Info().Msgf("scaled components %s to 0 replicas", strings.Join(componentNames, ", "))
 	if err != nil {
 		return err
 	}
+	logger.Info().Msgf("scaled components %s to 0 replicas", strings.Join(componentNames, ", "))
 	return nil
 }
 

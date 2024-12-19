@@ -187,15 +187,14 @@ func runFunctionPeriodically(ctx context.Context, someFunc func(ctx context.Cont
 }
 
 func getTooInactiveRrs(ctx context.Context, kubeClient *kube.Kube, inactivityLimit time.Duration, action string) ([]v1.RadixRegistration, error) {
-	logger := log.Ctx(ctx)
 	rrs, err := kubeClient.ListRegistrations(ctx)
 	if err != nil {
 		return nil, err
 	}
 	var rrsForDeletion []v1.RadixRegistration
 	for _, rr := range rrs {
-		logger := logger.With().Str("appName", rr.Name).Logger()
-		ctx = logger.WithContext(ctx)
+		logger := log.Ctx(ctx).With().Str("appName", rr.Name).Logger()
+		ctx := logger.WithContext(ctx)
 
 		if isWhitelisted(rr) {
 			logger.Debug().Msg("RadixRegistration is whitelisted, skipping")
