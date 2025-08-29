@@ -98,9 +98,9 @@ jobs:
           helm package --version $version --app-version $version .
           helm push radix-cluster-cleanup-$version.tgz $helm_repo
           
-          # Use git to get list of generated packages
-          helm_packages=$(git status --short | sed s/^...//)
-          echo "helm_packages="$helm_packages"" >>"$GITHUB_OUTPUT"
+          # Use glob to get list of generated packages
+          helm_packages=$(ls *.tgz)
+          echo "helm_packages=$helm_packages" >>"$GITHUB_OUTPUT"
       - name: Upload Helm packages to release
         if: needs.metadata.outputs.release-exist == 'true'
         env:
