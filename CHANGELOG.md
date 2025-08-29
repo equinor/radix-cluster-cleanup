@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - *(ci)* Configure new release workflows (#79) - ([ac2de11](https://github.com/equinor/radix-cluster-cleanup/commit/ac2de11cd4dbd889da028bd84034daac476b9bf6)) by @nilsgstrabo in [#79](https://github.com/equinor/radix-cluster-cleanup/pull/79)
 
 
+## New Contributors ❤️
+
+* @github-actions[bot] made their first contribution in [#81](https://github.com/equinor/radix-cluster-cleanup/pull/81)
 ## [1.0.21](https://github.com/equinor/radix-cluster-cleanup/compare/v1.0.7..v1.0.21) - 2025-06-13
 
 ### 🐛 Bug Fixes
