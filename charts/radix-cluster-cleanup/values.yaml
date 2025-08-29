@@ -18,8 +18,8 @@ serviceAccount:
   annotations: {}
 
 image:
-  repository: xx
-  tag: xx
+  repository: ghcr.io/equinor/radix/cluster-cleanup
+  tag: ""
   pullPolicy: Always
 
 imagePullSecrets: []
