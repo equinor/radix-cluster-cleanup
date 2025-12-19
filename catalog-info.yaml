@@ -3,7 +3,7 @@ kind: Component
 metadata:
   name: radix-cluster-cleanup
   title: Radix Cluster Cleanup
-  description: "Cleanup Playground cluster tidy, stops and deletes "unused" applications, as a scheduled service"
+  description: "Keeps the Playground cluster tidy, stops and deletes 'unused' applications, as a scheduled service"
   annotations:
     github.com/project-slug: equinor/radix-cluster-cleanup
 spec:
