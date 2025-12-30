@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.0..v1.1.1) - 2025-12-30
+
+### 🐛 Bug Fixes
+
+- Upgrade dependencies - ([0d5ac1e](https://github.com/equinor/radix-cluster-cleanup/commit/0d5ac1ef1fec60ba251703f8a9f4a6079a1cca84)) by @dependabot[bot] in [#84](https://github.com/equinor/radix-cluster-cleanup/pull/84)
+
+
+### 📚 Documentation
+
+- Add catalog-info.yaml config file (#85) - ([2061784](https://github.com/equinor/radix-cluster-cleanup/commit/20617848ca45d0c3a09c6ec4cc447fcbb39e498c)) by @emirgens in [#85](https://github.com/equinor/radix-cluster-cleanup/pull/85)
+
+- Rename LICENCE to LICENSE (#87) - ([65fbb57](https://github.com/equinor/radix-cluster-cleanup/commit/65fbb57be92bfe506553fcc38a4e15f9654f85dc)) by @emirgens in [#87](https://github.com/equinor/radix-cluster-cleanup/pull/87)
+
+
 ## [1.1.0](https://github.com/equinor/radix-cluster-cleanup/compare/v1.0.21..v1.1.0) - 2025-08-29
 
 ### 🚀 Features
@@ -9,6 +23,9 @@ All notable changes to this project will be documented in this file.
 - *(ci)* Configure new release workflows (#79) - ([ac2de11](https://github.com/equinor/radix-cluster-cleanup/commit/ac2de11cd4dbd889da028bd84034daac476b9bf6)) by @nilsgstrabo in [#79](https://github.com/equinor/radix-cluster-cleanup/pull/79)
 
 
+## New Contributors ❤️
+
+* @github-actions[bot] made their first contribution in [#81](https://github.com/equinor/radix-cluster-cleanup/pull/81)
 ## [1.0.21](https://github.com/equinor/radix-cluster-cleanup/compare/v1.0.7..v1.0.21) - 2025-06-13
 
 ### 🐛 Bug Fixes
