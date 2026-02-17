@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.1..v1.1.2) - 2026-02-17
+
+### 🐛 Bug Fixes
+
+- *(deps)* Update Go version to 1.25.7 (#94) - ([944f7f5](https://github.com/equinor/radix-cluster-cleanup/commit/944f7f5ffd59b580b9ffe77698dc612c4efe96ed)) by @nilsgstrabo in [#94](https://github.com/equinor/radix-cluster-cleanup/pull/94)
+
+
+### 📚 Documentation
+
+- Update catalog-info.yaml (#93) - ([bccb8c2](https://github.com/equinor/radix-cluster-cleanup/commit/bccb8c2f3ace63c1cc93644d705654b1f5fda1e5)) by @emirgens in [#93](https://github.com/equinor/radix-cluster-cleanup/pull/93)
+
+
+### ⚙️ Miscellaneous Tasks
+
+- Add permissions to PR testing workflow - ([124c674](https://github.com/equinor/radix-cluster-cleanup/commit/124c674275a819f8952d25ef89c5bf69af27a76d)) by @emirgens in [#92](https://github.com/equinor/radix-cluster-cleanup/pull/92)
+
+
 ## [1.1.1](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.0..v1.1.1) - 2026-01-05
 
 ### 🐛 Bug Fixes
