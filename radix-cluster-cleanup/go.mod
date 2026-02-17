@@ -1,10 +1,10 @@
 module github.com/equinor/radix-cluster-cleanup
 
-go 1.25.5
+go 1.25.7
 
 require (
 	github.com/equinor/radix-common v1.11.0
-	github.com/equinor/radix-operator v1.107.0
+	github.com/equinor/radix-operator v1.108.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
 	k8s.io/apimachinery v0.35.0
@@ -20,7 +20,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
-	github.com/cert-manager/cert-manager v1.19.2 // indirect
+	github.com/cert-manager/cert-manager v1.19.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
