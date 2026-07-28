@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.25.7-alpine3.23 AS builder
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.26.5-alpine3.24 AS builder
 
 ARG TARGETARCH
 ENV CGO_ENABLED=0 \
@@ -15,13 +15,11 @@ RUN go mod download
 COPY ./radix-cluster-cleanup .
 RUN go build -ldflags="-s -w" -o /build/radix-cluster-cleanup
 
-#Get busybox shell for distroless
-FROM gcr.io/distroless/base:debug AS debug
 # Final stage, ref https://github.com/GoogleContainerTools/distroless/blob/main/base/README.md for distroless
 FROM gcr.io/distroless/static
 WORKDIR /app
 COPY ./run_cluster_cleanup.sh .
 COPY --from=builder /build/radix-cluster-cleanup .
-COPY --from=debug /busybox/sh /bin
+COPY --from=gcr.io/distroless/base:debug /busybox/sh /bin
 USER 1000
 ENTRYPOINT ["/app/run_cluster_cleanup.sh"]
