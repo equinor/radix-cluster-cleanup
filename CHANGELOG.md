@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.4](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.3..v1.1.4) - 2026-07-29
+
+### 🐛 Bug Fixes
+
+- *(deps)* Bump go version and dependencies (#105) - ([79b9404](https://github.com/equinor/radix-cluster-cleanup/commit/79b9404f02e148c81b7d124193c126371340a3e0)) by @nilsgstrabo in [#105](https://github.com/equinor/radix-cluster-cleanup/pull/105)
+
+
+### ⚙️ Miscellaneous Tasks
+
+- *(ci)* Update github workflows to latest version and pin to sha - ([38aeadc](https://github.com/equinor/radix-cluster-cleanup/commit/38aeadc2e5ba47ea2e20dc9b59c056410619aa40)) by @sveinpj in [#102](https://github.com/equinor/radix-cluster-cleanup/pull/102)
+
+- Add skill-creator skill from radix-internal (#104) - ([4a4c8b8](https://github.com/equinor/radix-cluster-cleanup/commit/4a4c8b88bfefc1f4a8beb3bc4357535110d84628)) by @emirgens in [#104](https://github.com/equinor/radix-cluster-cleanup/pull/104)
+
+
 ## [1.1.3](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.2..v1.1.3) - 2026-03-24
 
 ### 🐛 Bug Fixes
