@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/equinor/radix-cluster-cleanup/pkg/delaytick"
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
-	"github.com/equinor/radix-common/utils/delaytick"
-	"github.com/equinor/radix-common/utils/timewindow"
+	"github.com/equinor/radix-cluster-cleanup/pkg/timewindow"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
 	"github.com/rs/zerolog"
@@ -267,12 +268,7 @@ func getRadixApplication(ctx context.Context, kubeClient *kube.Kube, appName str
 
 func isWhitelisted(rr *v1.RadixRegistration) bool {
 	whitelist := getWhitelist()
-	for _, item := range whitelist {
-		if rr.Name == item {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(whitelist, rr.Name)
 }
 
 func rrIsInactive(ctx context.Context, rrCreationTimestamp metav1.Time, rds []v1.RadixDeployment, rjs []v1.RadixJob, inactivityLimit time.Duration, action string) (bool, error) {

@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/equinor/radix-cluster-cleanup/pkg/settings"
-	"github.com/equinor/radix-common/utils/pointers"
 	"github.com/equinor/radix-common/utils/slice"
 	"github.com/equinor/radix-operator/pkg/apis/kube"
 	v1 "github.com/equinor/radix-operator/pkg/apis/radix/v1"
@@ -98,7 +97,7 @@ func scaleRdComponentsToZeroReplicas(ctx context.Context, kubeClient *kube.Kube,
 	logger := log.Ctx(ctx)
 	componentNames := make([]string, 0)
 	for i := range rd.Spec.Components {
-		rd.Spec.Components[i].ReplicasOverride = pointers.Ptr(0)
+		rd.Spec.Components[i].ReplicasOverride = new(0)
 		componentNames = append(componentNames, rd.Spec.Components[i].Name)
 	}
 	_, err := kubeClient.RadixClient().RadixV1().RadixDeployments(rd.Namespace).Update(ctx, &rd, metav1.UpdateOptions{})
