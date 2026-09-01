@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.5](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.4..v1.1.5) - 2026-08-31
+
+### 🐛 Bug Fixes
+
+- Update codebase to use modern go constructs (#109) - ([e4158d3](https://github.com/equinor/radix-cluster-cleanup/commit/e4158d3fe8fc50acf133cf26b64998bf52bf6d22)) by @nilsgstrabo in [#109](https://github.com/equinor/radix-cluster-cleanup/pull/109)
+
+
 ## [1.1.4](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.3..v1.1.4) - 2026-07-29
 
 ### 🐛 Bug Fixes
