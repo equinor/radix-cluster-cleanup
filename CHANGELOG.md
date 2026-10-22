@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.5](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.4..v1.1.5) - 2026-08-31
+## [1.1.6](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.5..v1.1.6) - 2026-10-21
+
+### 🐛 Bug Fixes
+
+- Bump google.golang.org/grpc (#114) - ([94440ad](https://github.com/equinor/radix-cluster-cleanup/commit/94440ad03cb9898f31cf10a148c8e1809a533759)) by @dependabot[bot] in [#114](https://github.com/equinor/radix-cluster-cleanup/pull/114)
+
+
+## [1.1.5](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.4..v1.1.5) - 2026-09-01
 
 ### 🐛 Bug Fixes
 
