@@ -1,6 +1,6 @@
 module github.com/equinor/radix-cluster-cleanup
 
-go 1.26.5
+go 1.27.3
 
 require (
 	github.com/equinor/radix-common v1.13.0
