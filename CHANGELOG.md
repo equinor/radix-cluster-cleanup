@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.6](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.5..v1.1.6) - 2026-10-21
+## [1.1.7](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.6..v1.1.7) - 2026-10-30
+
+### 🐛 Bug Fixes
+
+- Bump the go_modules group across 1 directory with 2 updates (#117) - ([835e216](https://github.com/equinor/radix-cluster-cleanup/commit/835e2167f570700bdbcd9dd3044a83dec2f296b2)) by @dependabot[bot] in [#117](https://github.com/equinor/radix-cluster-cleanup/pull/117)
+
+
+## [1.1.6](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.5..v1.1.6) - 2026-10-22
 
 ### 🐛 Bug Fixes
 
