@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.7](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.6..v1.1.7) - 2026-10-30
+## [1.1.8](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.7..v1.1.8) - 2026-11-09
+
+### 🐛 Bug Fixes
+
+- Bump github.com/cert-manager/cert-manager from 1.19.3 to 1.19.6 in /radix-cluster-cleanup in the go_modules group across 1 directory (#123) - ([42f1ddf](https://github.com/equinor/radix-cluster-cleanup/commit/42f1ddfe89b1ac816d9bdaba7ae4a76f694a1d60)) by @dependabot[bot] in [#123](https://github.com/equinor/radix-cluster-cleanup/pull/123)
+
+
+## [1.1.7](https://github.com/equinor/radix-cluster-cleanup/compare/v1.1.6..v1.1.7) - 2026-11-02
 
 ### 🐛 Bug Fixes
 
